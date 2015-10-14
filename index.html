@@ -1,0 +1,117 @@
+<!doctype html>
+<head>
+<meta name="description" content="Color Annealing Process">
+<meta name="keywords" content="HTML,CSS,Canvas,JavaScript">
+<meta name="author" content="Nick Radonic nick@radonic.us">
+<title>Color Annealing</title>
+
+<link rel="stylesheet" type="text/css" href="fillCanvas.css">
+<link rel="SHORTCUT ICON" href="../radonicimages/happy.ico">
+
+<link rel="shortcut icon" type="image/png" href="jasmine/lib/jasmine-2.0.0/jasmine_favicon.png">
+
+</head>
+
+<body>
+<h1>Visual Annealing Process - Melding Closest Color Neighbors</h1>
+<div id="info">
+    <h3>Nick Radonic <img src="../radonicimages/OffsetHappyFace.png"/></h3>
+	<br>www.radonic.us/CanvasGames/
+	<br>nick@radonic.us
+	<br>https://github.com/nradonic/CanvasGames
+	<br>March 2014
+</div>
+<p>A simple annealing program - randomly located colored pixels are swapped if the net local color matches are better</p>
+<p>Screen Draw: <span id="screenDraw"></span>
+<span width="200px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+
+</p>
+
+
+<p>Grid Size
+<select  id="select1" name=select1 onchange='OnChange(1);'>
+<option>4</option>
+<option>5</option>
+<option>6</option>
+<option>8</option>
+<option selected>10</option>
+<option>12</option>
+<option>20</option>
+<option>25</option>
+<option>30</option>
+<option>40</option>
+<option>50</option>
+<option>80</option>
+<option>120</option>
+<option>150</option>
+<option>200</option>
+<option>300</option>
+<option>400</option>
+<option>800</option>
+
+</select>
+&nbsp;&nbsp;&nbsp;&nbsp;
+Color Space:
+<select  id="select2" name=select2 onchange='OnChange(2);'>
+<option selected>2</option>
+<option>3</option>
+<option>4</option>
+<option>8</option>
+<option>255</option>
+
+</select>
+&nbsp;&nbsp;&nbsp;&nbsp;
+Range:
+<select  id="select4" name=select4 onchange='OnChange(4);'>
+<option selected>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+<option>6</option>
+<option>7</option>
+<option>8</option>
+<option>9</option>
+<option>10</option>
+<option>14</option>
+<option>20</option>
+
+</select>
+&nbsp;&nbsp;&nbsp;&nbsp;
+Delay:
+<select  id="select3" name=select3 onchange='cycleDelay();'>
+<option>1</option>
+<option>3</option>
+<option>10</option>
+<option>30</option>
+<option>100</option>
+<option>300</option>
+<option selected>1000</option>
+
+</select>
+&nbsp;&nbsp;&nbsp;&nbsp; <button  id="PausePlay" onclick='PausePlay();'>Pause/Play</button>
+</p>
+
+<div>
+<canvas id="drawHere" width="800" height="800" >
+
+</canvas>
+
+</div>
+<div>
+	<p>Changes: <span id="changes" style="border:green 1px solid"></span> Total Changes: <span id="totalChanges"  style="border:green 1px solid"></span> Noise Level: <span id="noiseLevel"></span>
+	</p>
+</div>
+
+<p>File Name: <input id="canvasgamesfilename"  placeholder="File Name">  &nbsp;&nbsp;&nbsp;&nbsp; <button  id="SaveData" onclick='SaveData();'>Save Data</button></p>
+<p>Load Data&nbsp;&nbsp; <select id="LoadData" onchange='LoadData();'    >
+<option>4</option>
+<option>5</option>
+</select>
+</p>
+
+
+
+
+</body>
+<script type="text/JavaScript" src="fillCanvas.js"> </script>
