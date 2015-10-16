@@ -24,6 +24,8 @@ var dbgMaxST1 = -10000000;
 var dbgMinST2 = 10000000;
 var dbgMaxST2 = -10000000;
 
+var fftLayer = "red";
+
 var fixedSpots = [];
 
 function setFixedValues(){
@@ -73,6 +75,8 @@ function gridCell(rc,gc,bc){this.r=rc;this.g=gc;this.b=bc;}
 
 // dataGrid stores graphic data
 var dataGrid = new Array(gridSize2);
+var fftGrid = new Array(gridSize2);
+
 // distanceGrid stores distance coefficients
 var distanceGrid = Array.matrix(gridSize,gridSize,0);
 
@@ -87,14 +91,23 @@ function fillDistanceGrid(){
 }
 
 // fill dataGrid with color objects....
-function fillDataGrid(){
-	for(var i=0;i<gridSize2;i++){
-		dataGrid[i]=new gridCell(rand1(),rand1(),rand1());
+function fillDataGrid(dG, gs2){
+	for(var i=0;i<gs2;i++){
+//		dG[i]=new gridCell(rand1(),rand1(),rand1());
+		dG[i]=new gridCell(255*(i%2),0,0);
+
 	}
-	dataGrid[fixedSpots[0][2]] = new gridCell(255,0,0); // red
-	dataGrid[fixedSpots[1][2]] = new gridCell(0,255,0); // green
-	dataGrid[fixedSpots[2][2]] = new gridCell(255,0,0); // blue
-	dataGrid[fixedSpots[3][2]] = new gridCell(0,0,0);   // black
+	dG[fixedSpots[0][2]] = new gridCell(255,0,0); // red
+	dG[fixedSpots[1][2]] = new gridCell(0,255,0); // green
+	dG[fixedSpots[2][2]] = new gridCell(0,0,255); // blue
+	dG[fixedSpots[3][2]] = new gridCell(0,0,0);   // black
+}
+
+// fill FFT grid with zeros in RGB elements
+function zeroFFTGrid(fG, gS2){
+	for ( var i = 0; i < gS2; i++){
+		fG[i] = new gridCell(i%256,(i+80)%256,(i+160)%256);
+	}
 }
 
 function OnChange(param)
@@ -102,6 +115,7 @@ function OnChange(param)
 	var dropdownSize = document.getElementById("select1");
     var dropdownColor = document.getElementById("select2");
     var dropdownRange = document.getElementById("select4");
+    fftLayer = document.getElementById("selectFFTL");
 
     // adjust smoothing range
     if(param==4){
@@ -111,6 +125,8 @@ function OnChange(param)
 	    gridSize = parseInt(dropdownSize.options[dropdownSize.selectedIndex].value);
 	    gridSize2 = gridSize*gridSize;   
 	    dataGrid = new Array(gridSize2);
+	    fftGrid = new Array(gridSize2);
+	    
 	    // create new distance grid
 	    distanceGrid = Array.matrix(gridSize,gridSize,0);
 	    // initialize distance grid 
@@ -125,7 +141,8 @@ function OnChange(param)
 	    cycleDelay();
 
         // generate new grid....
-	    fillDataGrid();	    
+	    fillDataGrid(dataGrid, gridSize2);	    
+	    zeroFFTGrid(fftGrid, gridSize2);
     }
     
     screenDraw = 0;
@@ -134,6 +151,7 @@ function OnChange(param)
     return true;
 }
 
+// draw raw graphics pattern
 function drawCanvas1(){
 	var c=document.getElementById("drawHere");
 	var ctx=c.getContext("2d");
@@ -151,6 +169,31 @@ function drawCanvas1(){
 		var x = squareCol*squareSide;
 		
 		var t='rgba('+dataGrid[i].r+','+ dataGrid[i].g+','+dataGrid[i].b+',255)';
+		ctx.fillStyle = t;
+		ctx.fillRect(x,y,squareSide,squareSide);
+    }
+   	ctx.stroke();
+}
+
+
+// draw raw graphics pattern
+function drawFFTCanvas(){
+	var c=document.getElementById("drawFFT2D");
+	var ctx=c.getContext("2d");
+	var myScreen = 800;
+	var myScreen2 = myScreen*myScreen*4;
+	var myScreen4 = myScreen*4;
+	var scaler =myScreen/gridSize; 
+	ctx.beginPath();
+	var squareSide = myScreen/gridSize;
+	for(var i = 0; i< gridSize2;i++){
+		var squareRow = Math.floor(i/gridSize);
+		var squareCol = Math.floor(i%gridSize);
+
+		var y = squareRow*squareSide;
+		var x = squareCol*squareSide;
+		
+		var t='rgba('+fftGrid[i].r+','+ fftGrid[i].g+','+fftGrid[i].b+',255)';
 		ctx.fillStyle = t;
 		ctx.fillRect(x,y,squareSide,squareSide);
     }
@@ -302,8 +345,6 @@ function fitColorAll(i1,j1,i2,j2,force1){
 	trade(i1,j1,i2,j2);
 	return force1 + force2 - force1At2 - force2At1;
 }
-
-
 
 // Test swaps with all nearest neighbors
 function testCellNeighborsOverGrid(i1,j1){
@@ -524,6 +565,7 @@ function smooth(){
 	
 	//middleSwap();
 	vectorSwap();
+	fftGrid = fft2d(dataGrid, gridSize);
 }
 
 function cycle(myVarr){
@@ -533,6 +575,7 @@ function cycle(myVarr){
 		clearInterval(myVarr);
 		start();
 	}
+	drawFFTCanvas();
 }
 
 var myVar;
