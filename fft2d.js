@@ -194,8 +194,8 @@ function insertColumn(line,fftData,M,column,color){
 function foldAndClipArray(dataC, N, M){
     var M2 = M*M;
 	var N2 = N*N;
-	var midM = M/2;
-	var midN = N/2;
+	var midM = Math.floor(M/2);
+	var midN = Math.floor(N/2);
 	
 	// initialize empty complex data array for R+G+B
 	var fCA = new Array(N2);
