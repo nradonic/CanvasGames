@@ -93,8 +93,8 @@ function fillDistanceGrid(){
 // fill dataGrid with color objects....
 function fillDataGrid(dG, gs2){
 	for(var i=0;i<gs2;i++){
-//		dG[i]=new gridCell(rand1(),rand1(),rand1());
-		dG[i]=new gridCell(255*(i%2),0,0);
+		dG[i]=new gridCell(rand1(),rand1(),rand1());
+//		dG[i]=new gridCell(255*(i%2),0,0);
 
 	}
 	dG[fixedSpots[0][2]] = new gridCell(255,0,0); // red

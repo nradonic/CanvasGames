@@ -3,46 +3,6 @@
 // RGB data structure
 function gridCellC(rc,rci,gc,gci,bc,bci){this.r=rc;this.ri=rci;this.g=gc;this.gi=gci;this.b=bc;this.bi=bci;}
 
-// element swap function
-// function SWAP(a,b){
-// 	var t = a;
-// 	a = b;
-// 	b = t;
-// }
-
-// 1-D FFT for a line of data
-// function fftLine(xr, xi, N){
-// 
-//   var m = Math.ceil(Math.log2(N));
-//   for (var i=0; i<N; ++i) {        // bit reversal 
-//     var j=0;
-//     for (var k=0; k<m; ++k)
-//       j=(j << 1) | (1 & (i >> k));
-// 	    if (j < i) 
-//     	  { var t = xr[i]; xr[j]=xr[i]; xr[i]=t; t=xi[i]; xi[i]=xi[j]; xi[j]=t; } // swap
-//   }
-//   for (var i=0; i<m; i++) {         // for log N stages 
-//     var n=Math.pow(2.0,i);  
-//     var w=Math.PI/n;
-//     //if (inverse) w=-w;
-//     var k=0;
-//     while (k<N-1) {             // for N components 
-//       for (var j=0; j<n; j++) {     // for each section 
-// 		var c=Math.cos(-j*w); var s=Math.sin(-j*w); 
-// 		var j1=k+j;
-// 		if(j1+n<N){
-// 			var tempr=xr[j1+n]*c-xi[j1]*s;
-// 			var tempi=xi[j1+n]*c+xr[j1]*s;
-// 			xr[j1+n]=xr[j1]-tempr;
-// 			xi[j1+n]=xi[j1]-tempi;
-// 			xr[j1]=xr[j1]+tempr;
-// 			xi[j1]=xi[j1]+tempi;
-// 		}
-//       }
-//       k+=2*n;
-//     }
-//   }
-// }
 
 // 1-D FFT for a line of data
 function fftLineC(x, N){
@@ -147,6 +107,39 @@ function extractRow(fftData,M,row, color){
 	return line;
 }
 
+// pull out the needed row of data for that color
+function extractColumn(fftData,M,column, color){
+	var M2 = M*M;
+	var line = new Array(M);
+	// copy out line of data...
+for (var cell = 0; cell<M; cell++){
+		var kCM = cell*M+column;
+		switch(color){
+		case "r":{
+					line[cell]={
+								r: fftData[kCM].r,
+								i: fftData[kCM].ri
+							}
+					break;
+				}
+		case "g":{
+					line[cell]={
+								r: fftData[kCM].g,
+								i: fftData[kCM].gi
+							}
+					break;
+				}
+		case "b":{
+					line[cell]={
+								r: fftData[kCM].b,
+								i: fftData[kCM].bi							}
+					break;
+				}
+		}
+	}
+	return line;
+}
+
 // put the complex data line back into the fft array
 function insertRow(line,fftData,M,row,color){
 	var kM = row*M;
@@ -172,6 +165,30 @@ function insertRow(line,fftData,M,row,color){
 	}
 }
 
+// put the complex data line back into the fft array
+function insertColumn(line,fftData,M,column,color){
+	var M2 = M*M;
+	for (var iX = 0; iX<M; iX++){
+		var kCM = column + iX*M;
+		switch(color){
+		case "r":{
+					fftData[kCM].r = line[iX].r;
+					fftData[kCM].ri = line[iX].i;
+					break;
+				}
+		case "g":{
+					fftData[kCM].g = line[iX].r;
+					fftData[kCM].gi = line[iX].i;
+					break;
+				}
+		case "b":{
+					fftData[kCM].b = line[iX].r;
+					fftData[kCM].bi = line[iX].i;
+					break;
+				}
+		}
+	}
+}
 
 // fold and clip the FFT array to the middle NxN region
 function foldAndClipArray(dataC, N, M){
@@ -184,13 +201,39 @@ function foldAndClipArray(dataC, N, M){
 	var fCA = new Array(N2);
 	for (var i = 0; i<N2; i++){
 		var kRN = Math.floor(i/N);
-		var kRM = (kRN+midM+midN)%M;
+		var kRM = (kRN+M-midN)%M;
 		var kCN = (i-kRN*N);
-		var kM = kRM*M+(kCN+midM+midN)%M;
+		var kM = kRM*M+(kCN+M-midN)%M;
 		fCA[i] = new gridCellC(dataC[kM].r,0,dataC[kM].g,0,dataC[kM].b,0);
 	}
 	return fCA;
 }
+
+
+// normalize fft results to 256
+function normalize(fftData, N){
+	var N2 = N*N;
+	var mr = 0;
+	for (var i=0; i<N2; i++){
+		var r = fftData[i].r;
+		var g = fftData[i].g;
+		var b = fftData[i].b;
+		mr = Math.max(mr,r*r,g*g,b*b);
+	}
+	mr = 256/(Math.sqrt(mr+.0000001));
+	for (var i=0; i<N2; i++){
+		var r = fftData[i].r;
+		var ri = fftData[i].ri;
+		var g = fftData[i].g;
+		var gi = fftData[i].gi;
+		var b = fftData[i].b;
+		var bi = fftData[i].bi;
+		fftData[i].r = Math.floor(Math.sqrt(r*r+ri*ri)*mr);
+		fftData[i].g = Math.floor(Math.sqrt(g*g+gi*gi)*mr);
+		fftData[i].b = Math.floor(Math.sqrt(b*b+bi*bi)*mr);
+	}
+}
+
 
 // function call to calculate 2D FFT
 function fft2d(img2dRGB, N){
@@ -200,67 +243,41 @@ function fft2d(img2dRGB, N){
 	var v = 256; // maximum video range
 	var fft = moveRealToComplex(img2dRGB,N,M);
 		
-	// var lineR = new Array(N);
-// 	var lineRi = new Array(N);
-// 	var lineG = new Array(N);
-// 	var lineGi = new Array(N);
-// 	var lineB = new Array(N);
-// 	var lineBi = new Array(N);
 	// fft by row and color component - pull out multiple lines of data...
 	for (var row = 0; row< M; row++){
-	// 	var kR = row * N;
-// 		// copy out line of data...
-// 		for (var col = kR; col < kR + M; col++){
-// 			var kc = col-kR; // convenience column number
-// 			if(kc<N && kR<N){
-// 				lineR[kc] = img2dRGB[col].r;
-// 				lineRi[kc] = 0;
-// 				lineG[kc] = img2dRGB[col].g;
-// 				lineGi[kc] = 0;
-// 				lineB[kc] = img2dRGB[col].b;
-// 				lineBi[kc] = 0;
-// 			} else {
-// 				lineR[kc] = 0;
-// 				lineRi[kc] = 0;
-// 				lineG[kc] = 0;
-// 				lineGi[kc] = 0;
-// 				lineB[kc] = 0;
-// 				lineBi[kc] = 0;
-// 			}
-// 		}
 		
-		
-		// transform each line
-	// 	fftLine(lineR, lineRi, M);
-// 		fftLine(lineG, lineGi, M);
-// 		fftLine(lineB, lineBi, M);
-		
+		// transform each line		
 		var line = extractRow(fft,M,row,"r");
 		fftLineC(line,M);
 		insertRow(line,fft,M,row,"r");
+		
 		line = extractRow(fft,M,row,"g");
 		fftLineC(line,M);
 		insertRow(line,fft,M,row,"g");
+		
 		line = extractRow(fft,M,row,"b");
 		fftLineC(line,M);
-		insertRow(line,fft,M,row,"b");
+		insertRow(line,fft,M,row,"b");	
+	}
+	
+	for (var col=0; col<M; col++){
+		//transform each column
+		var line = extractColumn(fft,M,col,"r");
+		fftLineC(line,M);
+		insertColumn(line,fft,M,col,"r");
 		
-		// copy FFT back to temporary array
-	// 	var kRM = row*M; // convenience row pointer
-// 		for (var col=kRM; col<kRM+M; col++){
-// 			var kCM = col-kRM;
-// 			fft[col].rc = lineR[kCM];
-// 			fft[col].rci = lineRi[kCM];
-// 			fft[col].gc = lineG[kCM];
-// 			fft[col].gci = lineGi[kCM];
-// 			fft[col].bc = lineB[kCM];
-// 			fft[col].bci = lineBi[kCM];
-// 		}		
+		line = extractColumn(fft,M,col,"g");
+		fftLineC(line,M);
+		insertColumn(line,fft,M,col,"g");
+		
+		line = extractColumn(fft,M,col,"b");
+		fftLineC(line,M);
+		insertColumn(line,fft,M,col,"b");	
 	}
 
-
 	var fftReturn = foldAndClipArray(fft, N, M);
-
+	normalize(fftReturn, N);
+	
 	return fftReturn;
 
 
@@ -271,27 +288,3 @@ function fft2d(img2dRGB, N){
 
 
 
-
-
-
-
-// 
-// 		var lineRMag = [];
-// 		var lineGMag = [];
-// 		var lineBMag = [];
-// 		// normalize each line Z
-// 		for ( var i =0; i<M; i++){
-// 			lineRMag[i] = Math.sqrt(lineR[i]*lineR[i]+lineRi[i]*lineRi[i]);
-// 			lineGMag[i] = Math.sqrt(lineG[i]*lineG[i]+lineGi[i]*lineGi[i]);
-// 			lineBMag[i] = Math.sqrt(lineB[i]*lineB[i]+lineBi[i]*lineBi[i]);
-// 		}
-// 		var lineRMax = v/(Math.max(...lineRMag) + 0.0000001);
-// 		var lineGMax = v/(Math.max(...lineGMag) + 0.0000001);
-// 		var lineBMax = v/(Math.max(...lineBMag) + 0.0000001);
-// 		// write data out to fft array
-// 		for (var col = kR; col < kR + N; col++){
-// 			var kc2 = Math.floor(col-kR-(N-1)/2+M)%M; // convenience variable splitting spectrum in half 
-// 			fft[col].r = Math.floor(lineRMag[kc2]*lineRMax);
-// 			fft[col].g = Math.floor(lineGMag[kc2]*lineGMax);
-// 			fft[col].b = Math.floor(lineBMag[kc2]*lineBMax);
-// 		}
