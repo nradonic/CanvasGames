@@ -5,7 +5,7 @@ var screenDelay=1;
 var gridSize = 4;
 var gridSize2 = gridSize*gridSize;
 var serviceFlag = true; // set when operating parameters change
-var Pause = false; // Pause Play button state
+var Pause = true; // Pause Play button state
 var ColorSpace = 2;
 var ColorScale = 255;
 var maxTest = 3*255*255;
@@ -93,63 +93,28 @@ function fillDistanceGrid(){
 // fill dataGrid with color objects....
 function fillDataGrid(dG, gs2){
 	for(var i=0;i<gs2;i++){
+//  		dG[i]=new gridCell(0,0,0);
+	//if(i%3===0){
+	//	dG[i]=new gridCell(0,0,0);
+	//} else {
 		dG[i]=new gridCell(rand1(),rand1(),rand1());
-//		dG[i]=new gridCell(255*(i%2),0,0);
+	//	dG[i]=new gridCell(255,0,0);
+	//} 
 
 	}
-	dG[fixedSpots[0][2]] = new gridCell(255,0,0); // red
-	dG[fixedSpots[1][2]] = new gridCell(0,255,0); // green
-	dG[fixedSpots[2][2]] = new gridCell(0,0,255); // blue
-	dG[fixedSpots[3][2]] = new gridCell(0,0,0);   // black
+//	dG[fixedSpots[0][2]] = new gridCell(255,0,0); // red
+//	dG[fixedSpots[1][2]] = new gridCell(0,255,0); // green
+//	dG[fixedSpots[2][2]] = new gridCell(0,0,255); // blue
+//	dG[fixedSpots[3][2]] = new gridCell(0,0,0);   // black
 }
 
 // fill FFT grid with zeros in RGB elements
 function zeroFFTGrid(fG, gS2){
 	for ( var i = 0; i < gS2; i++){
-		fG[i] = new gridCell(i%256,(i+80)%256,(i+160)%256);
+		fG[i] = new gridCell(0,0,0);
 	}
 }
 
-function OnChange(param)
-{
-	var dropdownSize = document.getElementById("select1");
-    var dropdownColor = document.getElementById("select2");
-    var dropdownRange = document.getElementById("select4");
-    fftLayer = document.getElementById("selectFFTL");
-
-    // adjust smoothing range
-    if(param==4){
-    	forceRange = parseInt(dropdownRange.options[dropdownRange.selectedIndex].value);
-    
-    } else {
-	    gridSize = parseInt(dropdownSize.options[dropdownSize.selectedIndex].value);
-	    gridSize2 = gridSize*gridSize;   
-	    dataGrid = new Array(gridSize2);
-	    fftGrid = new Array(gridSize2);
-	    
-	    // create new distance grid
-	    distanceGrid = Array.matrix(gridSize,gridSize,0);
-	    // initialize distance grid 
-	    fillDistanceGrid();
-
-	    // set the fixed color spot locations
-	    setFixedValues();
-
-	    ColorSpace = parseInt(dropdownColor.options[dropdownColor.selectedIndex].value);
-	    ColorScale = Math.floor(255/(ColorSpace-1));
-	    
-	    cycleDelay();
-
-        // generate new grid....
-	    fillDataGrid(dataGrid, gridSize2);	    
-	    zeroFFTGrid(fftGrid, gridSize2);
-    }
-    
-    screenDraw = 0;
-    serviceFlag = true;
-    
-    return true;
-}
 
 // draw raw graphics pattern
 function drawCanvas1(){
@@ -233,6 +198,50 @@ function drawCanvas2(iIndex1, jIndex1, iIndex2, jIndex2){
     
 	ctx.stroke();
 }
+
+
+function OnChange(param)
+{
+	var dropdownSize = document.getElementById("select1");
+    var dropdownColor = document.getElementById("select2");
+    var dropdownRange = document.getElementById("select4");
+    fftLayer = document.getElementById("selectFFTL");
+
+    // adjust smoothing range
+    if(param==4){
+    	forceRange = parseInt(dropdownRange.options[dropdownRange.selectedIndex].value);
+    
+    } else {
+	    gridSize = parseInt(dropdownSize.options[dropdownSize.selectedIndex].value);
+	    gridSize2 = gridSize*gridSize;   
+	    dataGrid = new Array(gridSize2);
+	    fftGrid = new Array(gridSize2);
+	    
+	    // create new distance grid
+	    distanceGrid = Array.matrix(gridSize,gridSize,0);
+	    // initialize distance grid 
+	    fillDistanceGrid();
+
+	    // set the fixed color spot locations
+	    setFixedValues();
+
+	    ColorSpace = parseInt(dropdownColor.options[dropdownColor.selectedIndex].value);
+	    ColorScale = Math.floor(255/(ColorSpace-1));
+	    
+	    cycleDelay();
+
+        // generate new grid....
+	    fillDataGrid(dataGrid, gridSize2);	    
+	    zeroFFTGrid(fftGrid, gridSize2);
+        screenDraw = 0;
+    }
+	drawCanvas1(); 
+	drawFFTCanvas();
+    serviceFlag = true;
+    
+//    return true;
+}
+
 
 // color differences squared only
 
@@ -569,13 +578,13 @@ function smooth(){
 }
 
 function cycle(myVarr){
-	smooth();
 	drawCanvas1(); 
+	drawFFTCanvas();
+	smooth();
 	if(serviceFlag){
 		clearInterval(myVarr);
 		start();
 	}
-	drawFFTCanvas();
 }
 
 var myVar;
@@ -606,10 +615,10 @@ function PausePlay(){
 	if(!Pause){start();	document.getElementById("PausePlay").innerHTML="Pause";}
 }
 
-fillDistanceGrid();
-OnChange();
-drawCanvas1();
-start();
+//fillDistanceGrid();
+OnChange(0);
+//drawCanvas1();
+//start();
 
 function SaveData(){
 	stop();

@@ -205,6 +205,7 @@ function foldAndClipArray(dataC, N, M){
 		var kCN = (i-kRN*N);
 		var kM = kRM*M+(kCN+M-midN)%M;
 		fCA[i] = new gridCellC(dataC[kM].r,0,dataC[kM].g,0,dataC[kM].b,0);
+		if(kM===0){ fCA[i].r=0; fCA[i].g=0;fCA[i].b=0;}
 	}
 	return fCA;
 }
@@ -214,11 +215,18 @@ function foldAndClipArray(dataC, N, M){
 function normalize(fftData, N){
 	var N2 = N*N;
 	var mr = 0;
+	var midN = Math.floor(N/2);
+	var midCell = N*midN+midN;
 	for (var i=0; i<N2; i++){
 		var r = fftData[i].r;
+		var ri = fftData[i].ri;
 		var g = fftData[i].g;
+		var gi = fftData[i].gi;
 		var b = fftData[i].b;
-		mr = Math.max(mr,r*r,g*g,b*b);
+		var bi = fftData[i].bi;
+		if(i!==midCell){
+			mr = Math.max(mr,r*r+ri*ri,g*g+gi*gi,b*b+bi*bi);
+		}
 	}
 	mr = 256/(Math.sqrt(mr+.0000001));
 	for (var i=0; i<N2; i++){
@@ -232,6 +240,9 @@ function normalize(fftData, N){
 		fftData[i].g = Math.floor(Math.sqrt(g*g+gi*gi)*mr);
 		fftData[i].b = Math.floor(Math.sqrt(b*b+bi*bi)*mr);
 	}
+	fftData[midCell].r = 255;
+	fftData[midCell].g = 255;
+	fftData[midCell].b = 255;
 }
 
 
