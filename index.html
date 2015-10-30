@@ -10,7 +10,11 @@
 	<link rel="SHORTCUT ICON" href="../radonicimages/happy.ico">
 
 	<link rel="shortcut icon" type="image/png" href="jasmine/lib/jasmine-2.0.0/jasmine_favicon.png">
-
+    <style type="text/css">
+   		p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000}
+    	p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000; min-height: 14.0px}
+    	span.s1 {font-kerning: none}
+  	</style>
 </head>
 
 <body>
@@ -22,7 +26,9 @@
 		<br>https://github.com/nradonic/CanvasGames
 		<br>March 2014
 	</div>
-	<p>A simple annealing program - randomly located colored pixels are swapped if the net local color matches are better</p>
+	<br>
+	<h3 style="width:800px;text-align:center">Simple annealing program</h3>
+	<p>Nearby colored pixels are swapped if the net local color matches are better</p>
 	<p>Screen Draw: <span id="screenDraw"></span>
 	<span width="200px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
 	<button  id="start" onclick='start();'>Start</button>&nbsp;&nbsp;
@@ -119,6 +125,8 @@
 	</div>
 
 	<div>
+	<br>
+		<h3 style="width:800px;text-align:center">2D FFT analysis of display grid</h3>
 		<p>FFT Layer
 			<select  id="selectFFTL" name=selectFFTL onchange='OnChange(5);'>
 				<option selected>All</option>
@@ -131,8 +139,65 @@
 		<canvas id="drawFFT2D" width="800" height="800" >
 		</canvas>
 	</div>
+	<div style="width:800px">
+		<br><br>
+			<h3 style="width:800px;text-align:center">Annealing Description</h3>
 
-
+		<p class="p1"><span class="s1">Method:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">The program calculates the amount of color difference in a small patch 'Range' number of blocks from each square. The swap of two color blocks will occur if that reduces the amount of color difference the most, compared to other blocks in that patch. It takes a certain amount of time and processing power to do this calculation, and so adding a delay interval between calculations keeps processor utilization down, and makes things move in a steady way. The size of the grid can be changed, the color 'depth' per R-G-B component can be changed from 1 bit (2 intensities) to 8 bits (255 intensities) per component. Sorting is more obvious at low bit depth. And at a middle grid size the effect is quite abstract after a while.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">Time:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">If you leave it running for thousands of cycles (maybe reduce the delay to 100 milliseconds to speed it up) the random colors will sort themselves and collect together. Red areas moving towards red, blue towards blue, and green towards green. But the effect is not monolithic - it is dependent on the range of sensing of neighbor colors, and it takes a long time to move blocks between block pairs.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">Color:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">RGB is the display color map. It's a bit subtle, since white has red+green+blue, and yellow is red+green, so strange combinations come together because mathematically they aren't far apart. Full red is equally far from full green or full blue, while black is half as far from full red. White to black has all three R-G-B components at full difference to the 0-0-0 values of black.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">Color variation:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">The settling out of the pattern is more obvious with the small color palates - i.e. 2 steps of color intensity for red, green and blue - versus the higher resolution 255 color steps per component. It becomes somewhat surprising seeing what colors are closer to each other mathematically.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">Grid Size:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">The patterns seem to have a period in the 20's, hence I find a grid size of 50 is fast enough (fewer calculations) compared to 120 (which is a nice size allowing for repetition). I use 20 when I quickly want to see what happens or for during code development. And at 800 blocks we see one block per pixel and really load up the processor with long cycles. But it still works.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">Range:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">2-20 pixel range for color influence calculations. I.e. the smoothing is looking to reduce color variation within a specific block distance by swapping block pairs there. At 2 blocks the result looks more chunky, and at 10 it smoothes out more. </span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">FFT Window:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">A calculation of the 2D spatial frequencies displayed by each color component R-G-B treated separately. The bright spot in the center is 'DC' or average color level, which is going to be something like 1/2 of color scale for each block, summed over the grid - in other words, very bright - so I chop it off and make that block white. Everything else shows less range, so I rescale the differences to make them visible. The next block out is averaging over half the space, then the second is 1/3, 1/4, and so on until the edges of the FFT spectrum reflect the 'high frequency' block to block variations. As the blocks smooth out the random energy dies out and the lower frequencies become dominant - but not exclusively. Left to Right variations are horizontal frequencies on the screen, vertical FFT blocks represent vertical variations in color. This is updated per display cycle.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">The three R-G-B frequency components or their sum can be displayed separately. You'll see that each color component has a different pattern, because the presence of one color excludes the others, and the FFT result reflects that.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">Buttons:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">START - free calculation</span></p>
+<p class="p1"><span class="s1">STEP - lets you see the next state, one calculation at a time</span></p>
+<p class="p1"><span class="s1">PAUSE - stops the free calculation</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">Screen Draw - displays iteration number</span></p>
+<p class="p1"><span class="s1">Changes - an estimate of how many blocks flipped last cycle - decreases as the grid settles down to a low level of differences</span></p>
+<p class="p1"><span class="s1">Noise Level - description of the mathematical differences calculated between the original state and the new state - tends to 0 as the grid reaches a later state</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">FFT Layer:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">All - R-G-B</span></p>
+<p class="p1"><span class="s1">Red - red layer only</span></p>
+<p class="p1"><span class="s1">Green - green layer only</span></p>
+<p class="p1"><span class="s1">Blue - blue layer only</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">Load/Save - not fully working: file save at server</span></p>
+	</div>
+<br>
 </body>
 <script type="text/JavaScript" src="fft2d.js"> </script>
 <script type="text/JavaScript" src="fillCanvas.js"> </script>
