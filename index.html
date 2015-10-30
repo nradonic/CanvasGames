@@ -25,7 +25,9 @@
 	<p>A simple annealing program - randomly located colored pixels are swapped if the net local color matches are better</p>
 	<p>Screen Draw: <span id="screenDraw"></span>
 	<span width="200px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-	<button  id="start" onclick='start();'>Start</button>
+	<button  id="start" onclick='start();'>Start</button>&nbsp;&nbsp;
+	<button  id="step" onclick='step();'>Step</button>&nbsp;&nbsp;
+	<button  id="PausePlay" onclick='PausePlay();'>Pause/Play</button>
 
 	</p>
 
@@ -90,7 +92,7 @@
 		<option selected>1000</option>
 
 	</select>
-	&nbsp;&nbsp;&nbsp;&nbsp; <button  id="PausePlay" onclick='PausePlay();'>Pause/Play</button>
+	&nbsp;&nbsp;&nbsp;
 	</p>
 
 	<div>
@@ -119,7 +121,8 @@
 	<div>
 		<p>FFT Layer
 			<select  id="selectFFTL" name=selectFFTL onchange='OnChange(5);'>
-				<option selected>Red</option>
+				<option selected>All</option>
+				<option>Red</option>
 				<option>Green</option>
 				<option>Blue</option>
 			</select>

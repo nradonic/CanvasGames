@@ -6,6 +6,8 @@ var gridSize = 4;
 var gridSize2 = gridSize*gridSize;
 var serviceFlag = true; // set when operating parameters change
 var Pause = true; // Pause Play button state
+var Step = false; // runs through 1 cycle of smooth + FFT when true
+
 var ColorSpace = 2;
 var ColorScale = 255;
 var maxTest = 3*255*255;
@@ -24,7 +26,7 @@ var dbgMaxST1 = -10000000;
 var dbgMinST2 = 10000000;
 var dbgMaxST2 = -10000000;
 
-var fftLayer = "red";
+var fftLayer = "All";
 
 var fixedSpots = [];
 
@@ -157,8 +159,25 @@ function drawFFTCanvas(){
 
 		var y = squareRow*squareSide;
 		var x = squareCol*squareSide;
-		
-		var t='rgba('+fftGrid[i].r+','+ fftGrid[i].g+','+fftGrid[i].b+',255)';
+		var t= '';
+		switch(fftLayer){
+			case "All":
+				t='rgba('+fftGrid[i].r+','+ fftGrid[i].g+','+fftGrid[i].b+',255)';
+				break;		
+			case "Red":
+				t='rgba('+fftGrid[i].r+','+ 0+','+0+',255)';
+				break;		
+			case "Green":
+				t='rgba('+0+','+ fftGrid[i].g+','+0+',255)';
+				break;		
+			case "Blue":
+				t='rgba('+0+','+ 0+','+fftGrid[i].b+',255)';
+				break;		
+			 
+		    default:
+  				t='rgba('+fftGrid[i].r+','+ fftGrid[i].g+','+fftGrid[i].b+',255)';
+		    	break;
+		}
 		ctx.fillStyle = t;
 		ctx.fillRect(x,y,squareSide,squareSide);
     }
@@ -200,18 +219,8 @@ function drawCanvas2(iIndex1, jIndex1, iIndex2, jIndex2){
 }
 
 
-function OnChange(param)
-{
-	var dropdownSize = document.getElementById("select1");
-    var dropdownColor = document.getElementById("select2");
-    var dropdownRange = document.getElementById("select4");
-    fftLayer = document.getElementById("selectFFTL");
-
-    // adjust smoothing range
-    if(param==4){
-    	forceRange = parseInt(dropdownRange.options[dropdownRange.selectedIndex].value);
-    
-    } else {
+// reset grid related values
+function reconfigureGridRelatedStructures(dropdownSize, dropdownColor, dropdownRange){
 	    gridSize = parseInt(dropdownSize.options[dropdownSize.selectedIndex].value);
 	    gridSize2 = gridSize*gridSize;   
 	    dataGrid = new Array(gridSize2);
@@ -234,6 +243,48 @@ function OnChange(param)
 	    fillDataGrid(dataGrid, gridSize2);	    
 	    zeroFFTGrid(fftGrid, gridSize2);
         screenDraw = 0;
+}
+
+// handle html button presses
+function OnChange(param)
+{
+	var dropdownSize = document.getElementById("select1");
+    var dropdownColor = document.getElementById("select2");
+    var dropdownRange = document.getElementById("select4");
+    fftLayer = document.getElementById("selectFFTL").value;
+
+    // adjust smoothing range
+    if(param==4){
+    	forceRange = parseInt(dropdownRange.options[dropdownRange.selectedIndex].value);
+    
+    } else if(param==5){
+    	// already read in the new parameter fftLayer
+    	var a=0; // for break point...
+    } else {
+// 	    gridSize = parseInt(dropdownSize.options[dropdownSize.selectedIndex].value);
+// 	    gridSize2 = gridSize*gridSize;   
+// 	    dataGrid = new Array(gridSize2);
+// 	    fftGrid = new Array(gridSize2);
+// 	    
+// 	    // create new distance grid
+// 	    distanceGrid = Array.matrix(gridSize,gridSize,0);
+// 	    // initialize distance grid 
+// 	    fillDistanceGrid();
+// 
+// 	    // set the fixed color spot locations
+// 	    setFixedValues();
+// 
+// 	    ColorSpace = parseInt(dropdownColor.options[dropdownColor.selectedIndex].value);
+// 	    ColorScale = Math.floor(255/(ColorSpace-1));
+// 	    
+// 	    cycleDelay();
+// 
+//         // generate new grid....
+// 	    fillDataGrid(dataGrid, gridSize2);	    
+// 	    zeroFFTGrid(fftGrid, gridSize2);
+//         screenDraw = 0;
+
+		reconfigureGridRelatedStructures(dropdownSize, dropdownColor, dropdownRange);
     }
 	drawCanvas1(); 
 	drawFFTCanvas();
@@ -583,20 +634,34 @@ function cycle(myVarr){
 	smooth();
 	if(serviceFlag){
 		clearInterval(myVarr);
-		start();
+		if(Step===false){
+				startLooping();
+		}
 	}
 }
 
 var myVar;
 
-function start(){
+
+function startLooping(){
 	myVar=setInterval(function(){cycle(myVar)},screenDelay);
 	Pause = false;
+}
+
+// start repeating operations
+function start(){
+	Step = false;
+	startLooping();
 }
 
 function stop(){
 	clearInterval(myVar); 
 	Pause = true;
+}
+
+function step(){
+	Step = true;
+	cycle(myVar);
 }
 
 function cycleDelay(){
