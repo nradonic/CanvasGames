@@ -117,6 +117,14 @@ function zeroFFTGrid(fG, gS2){
 	}
 }
 
+// draw data
+function drawData(){
+	document.getElementById("screenDraw").innerHTML=screenDraw.toFixed(0);
+	document.getElementById("changes").innerHTML=changes.toFixed(0);
+	document.getElementById("totalChanges").innerHTML=totalChanges.toFixed(0);
+	document.getElementById("noiseLevel").innerHTML=noiseLevel.toFixed(0);
+}
+
 
 // draw raw graphics pattern
 function drawCanvas1(){
@@ -263,7 +271,9 @@ function OnChange(param)
     } else {
 		reconfigureGridRelatedStructures(dropdownSize, dropdownColor, dropdownRange);
     }
+    drawData();
 	drawCanvas1(); 
+	fftGrid = fft2d(dataGrid, gridSize);
 	drawFFTCanvas();
     serviceFlag = true;
 }
@@ -593,10 +603,7 @@ function middleSwap(){
 
 function smooth(){
 	screenDraw++;
-	document.getElementById("screenDraw").innerHTML=screenDraw.toFixed(0);
-	document.getElementById("changes").innerHTML=changes.toFixed(0);
-	document.getElementById("totalChanges").innerHTML=totalChanges.toFixed(0);
-	document.getElementById("noiseLevel").innerHTML=noiseLevel.toFixed(0);
+	drawData();
 	
 	//middleSwap();
 	vectorSwap();
@@ -604,9 +611,9 @@ function smooth(){
 }
 
 function cycle(myVarr){
+	smooth();
 	drawCanvas1(); 
 	drawFFTCanvas();
-	smooth();
 	if(serviceFlag){
 		clearInterval(myVarr);
 		if(Step===false){
