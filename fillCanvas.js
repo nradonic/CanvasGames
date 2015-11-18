@@ -261,36 +261,11 @@ function OnChange(param)
     	// already read in the new parameter fftLayer
     	var a=0; // for break point...
     } else {
-// 	    gridSize = parseInt(dropdownSize.options[dropdownSize.selectedIndex].value);
-// 	    gridSize2 = gridSize*gridSize;   
-// 	    dataGrid = new Array(gridSize2);
-// 	    fftGrid = new Array(gridSize2);
-// 	    
-// 	    // create new distance grid
-// 	    distanceGrid = Array.matrix(gridSize,gridSize,0);
-// 	    // initialize distance grid 
-// 	    fillDistanceGrid();
-// 
-// 	    // set the fixed color spot locations
-// 	    setFixedValues();
-// 
-// 	    ColorSpace = parseInt(dropdownColor.options[dropdownColor.selectedIndex].value);
-// 	    ColorScale = Math.floor(255/(ColorSpace-1));
-// 	    
-// 	    cycleDelay();
-// 
-//         // generate new grid....
-// 	    fillDataGrid(dataGrid, gridSize2);	    
-// 	    zeroFFTGrid(fftGrid, gridSize2);
-//         screenDraw = 0;
-
 		reconfigureGridRelatedStructures(dropdownSize, dropdownColor, dropdownRange);
     }
 	drawCanvas1(); 
 	drawFFTCanvas();
     serviceFlag = true;
-    
-//    return true;
 }
 
 
@@ -642,24 +617,28 @@ function cycle(myVarr){
 
 var myVar;
 
-
+// start calculating updates
 function startLooping(){
 	myVar=setInterval(function(){cycle(myVar)},screenDelay);
 	Pause = false;
+	document.getElementById("PausePlay").innerHTML="Pause";
 }
 
 // start repeating operations
 function start(){
 	Step = false;
 	startLooping();
+	//document.getElementById("PausePlay").innerHTML="Pause";
 }
 
 function stop(){
 	clearInterval(myVar); 
 	Pause = true;
+	document.getElementById("PausePlay").innerHTML="Play";
 }
 
 function step(){
+	stop();
 	Step = true;
 	cycle(myVar);
 }
@@ -674,10 +653,10 @@ function ButtonLabelToPlay(){
 	document.getElementById("PausePlay").innerHTML="Play";
 }
 
+// toggle between running and paused if current state is not paused
 function PausePlay(){
-	Pause = !Pause;
-	if(Pause){stop(); document.getElementById("PausePlay").innerHTML="Play";}
-	if(!Pause){start();	document.getElementById("PausePlay").innerHTML="Pause";}
+	if(!Pause){stop(); } 
+	else {start();	}
 }
 
 //fillDistanceGrid();
